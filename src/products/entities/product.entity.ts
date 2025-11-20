@@ -8,7 +8,7 @@ export class Product {
   @Column('text', { unique: true })
   title: string;
 
-  @Column('numeric', { default: 0 })
+  @Column('float', { default: 0 })
   price: number;
 
   @Column({
@@ -20,7 +20,7 @@ export class Product {
   @Column('text', { unique: true })
   slug: string;
 
-  @Column('text', { default: 0 })
+  @Column('int', { default: 0 })
   stock: number;
 
   @Column('text', { array: true })
