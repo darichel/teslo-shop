@@ -29,28 +29,34 @@ export class ProductsService {
     }
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll() {
+    const products = await this.productsRepository.find();
+    return products;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(term: string) {
+    const product = await this.productsRepository.findOneBy({ id: term });
+    if (!product)
+      throw new BadRequestException(`Product with id ${term} not found`);
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
+  async remove(id: string) {
+    const product = await this.findOne(id.toString());
+    await this.productsRepository.remove(product);
     return `This action removes a #${id} product`;
   }
 
   private handleDBExecption(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 
-      this.logger.error(error);
-      throw new InternalServerErrorException(
-        'Unexpected error , please check server logs :(',
-      );
+    this.logger.error(error);
+    throw new InternalServerErrorException(
+      'Unexpected error , please check server logs :(',
+    );
   }
 }
