@@ -33,7 +33,7 @@ export class ProductsService {
   }
 
   async findAll(paginationDto: PaginationDto) {
-    console.log({paginationDto});
+    console.log({ paginationDto });
     const { limit = 10, offset = 0 } = paginationDto;
     const products = await this.productsRepository.find({
       take: limit,
@@ -44,12 +44,18 @@ export class ProductsService {
   }
 
   async findOne(term: string) {
-    let product: Product | null;;
-    if(IsUUID(term)){
+    let product: Product | null;
+    if (IsUUID(term)) {
       product = await this.productsRepository.findOneBy({ id: term });
-    }else{
-      product = await this.productsRepository.findOneBy({ slug: term });
-
+    } else {
+      //product = await this.productsRepository.findOneBy({ slug: term });
+      const queryBuilder = this.productsRepository.createQueryBuilder();
+      product = await queryBuilder
+        .where('UPPER(title) =:title OR slug =:slug', {
+          title: term.toUpperCase(),
+          slug: term.toLowerCase(),
+        })
+        .getOne();
     }
     if (!product)
       throw new BadRequestException(`Product with id ${term} not found`);
