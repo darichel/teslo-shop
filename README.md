@@ -3,7 +3,22 @@
 </p>
 
 # Teslo API
-1- Levantar base de datos con docker
+1. Clonar proyecto
+```bash
+git clone https://github.com/darichel/teslo-shop.git
 ```
-docker-compose up -d
+2. Instalar de pendencias
+```bash
+$ yarn install
 ```
+3. Clonar archivo ``.env.template`` y renombrarlo a ```.env```
+4. Cambiar las variables de entorno
+5. Levantar la base de datos
+```bash
+$ docker-compose up -d
+```
+6. Levantar entorno desarrollo 
+```bash
+$ yarn start:dev
+```
+
