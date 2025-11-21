@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { validate as IsUUID } from 'uuid';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,6 +21,7 @@ export class ProductsService {
     private readonly productsRepository: Repository<Product>,
     @InjectRepository(ProductImage)
     private readonly productImagesRepository: Repository<ProductImage>,
+    private dataSource: DataSource
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -47,7 +48,7 @@ export class ProductsService {
       skip: offset,
       relations: {
         images: true,
-      }
+      },
     });
 
     return products.map((product) => ({
@@ -85,13 +86,20 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
+
+    const { images, ...toUpdate } = updateProductDto;
+
     const product = await this.productsRepository.preload({
       id: id,
-      ...updateProductDto,
-      images: [],
+      ...toUpdate,
     });
+
     if (!product)
       throw new BadRequestException(`Product with id ${id} not found`);
+
+    //Create query runner
+    const queryRunner = this.dataSource.createQueryRunner();
+    
 
     try {
       await this.productsRepository.save(product);
