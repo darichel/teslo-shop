@@ -9,9 +9,8 @@ import { Repository } from 'typeorm';
 import { validate as IsUUID } from 'uuid';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { validate } from 'class-validator';
+import { Product, ProductImage } from './entities';
 
 @Injectable()
 export class ProductsService {
@@ -20,13 +19,21 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+    @InjectRepository(ProductImage)
+    private readonly productImagesRepository: Repository<ProductImage>,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
     try {
-      const product = this.productsRepository.create(createProductDto);
+      const { images = [], ...productDetails } = createProductDto;
+      const product = this.productsRepository.create({
+        ...productDetails,
+        images: images.map((image) =>
+          this.productImagesRepository.create({ url: image }),
+        ),
+      });
       await this.productsRepository.save(product);
-      return product;
+      return { ...product, images };
     } catch (error) {
       this.handleDBExecption(error);
     }
@@ -66,6 +73,7 @@ export class ProductsService {
     const product = await this.productsRepository.preload({
       id: id,
       ...updateProductDto,
+      images: [],
     });
     if (!product)
       throw new BadRequestException(`Product with id ${id} not found`);
