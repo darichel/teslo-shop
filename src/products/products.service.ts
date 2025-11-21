@@ -21,7 +21,7 @@ export class ProductsService {
     private readonly productsRepository: Repository<Product>,
     @InjectRepository(ProductImage)
     private readonly productImagesRepository: Repository<ProductImage>,
-    private dataSource: DataSource
+    private dataSource: DataSource,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -86,7 +86,6 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-
     const { images, ...toUpdate } = updateProductDto;
 
     const product = await this.productsRepository.preload({
@@ -99,12 +98,29 @@ export class ProductsService {
 
     //Create query runner
     const queryRunner = this.dataSource.createQueryRunner();
-    
+    //Connect to the database
+    await queryRunner.connect();
+    //Start a transaction
+    await queryRunner.startTransaction();
 
     try {
-      await this.productsRepository.save(product);
-      return product;
+      //delete old images
+      if (images) {
+        await queryRunner.manager.delete(ProductImage, { product: { id } });
+
+        product.images = images.map((image) =>
+          this.productImagesRepository.create({ url: image }),
+        );
+      }
+
+      await queryRunner.manager.save(product);
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+      //await this.productsRepository.save(product);
+      return this.findOnePlain(id);
     } catch (error) {
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
       this.handleDBExecption(error);
     }
   }
