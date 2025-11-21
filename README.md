@@ -3,21 +3,31 @@
 </p>
 
 # Teslo API
-1. Clonar proyecto
+1 - Clonar proyecto
 ```bash
 git clone https://github.com/darichel/teslo-shop.git
 ```
-2. Instalar de pendencias
+
+2 - Instalar de pendencias
 ```bash
 $ yarn install
 ```
-3. Clonar archivo ``.env.template`` y renombrarlo a ```.env```
-4. Cambiar las variables de entorno
-5. Levantar la base de datos
+
+3 - Clonar archivo ``.env.template`` y renombrarlo a ```.env```
+
+4 - Cambiar las variables de entorno
+
+5 - Levantar la base de datos
 ```bash
 $ docker-compose up -d
 ```
-6. Levantar entorno desarrollo 
+
+6 - Ejecutar SEED para llenar BD 
+```
+http://localhost:3000/api/v1/seed
+```
+
+7 - Levantar entorno desarrollo 
 ```bash
 $ yarn start:dev
 ```
