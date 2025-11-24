@@ -8,15 +8,19 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesService } from './files.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 import { fileFileter, fileNamer } from './helpers';
+import { FilesService } from './files.service';
 
 @Controller('files')
 export class FilesController {
-  constructor(private readonly filesService: FilesService) {}
+  constructor(private readonly filesService: FilesService,
+    private readonly configService: ConfigService
+
+  ) {}
 
   @Get('product/:id')
   findProductImage(@Res() res: Response, @Param('id') id: string) {
@@ -37,7 +41,7 @@ export class FilesController {
   uploadProductImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File not provided');
 
-    const secureUrl = `${file.filename}`;
+    const secureUrl = `${this.configService.get('HOST_API')}/files/product/${file.filename}`;
 
     return { secureUrl };
   }
