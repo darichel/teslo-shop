@@ -57,6 +57,10 @@ export class AuthService {
     return { ...user, token: this.getJwtToken({ email: user.email }) };
   }
 
+  testingPrivateRoute() {
+    return 'Hola mundo private';
+  }
+
   private handleDbErros(error: any): never {
     if (error.code === '23505') {
       throw new BadRequestException(`Error, ${error.detail}`);
