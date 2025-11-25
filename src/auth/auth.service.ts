@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -6,12 +10,15 @@ import * as bcrypt from 'bcrypt';
 
 import { User } from './entities/user.entity';
 import { CreateUserDto, LoginUserDto } from './dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -25,8 +32,7 @@ export class AuthService {
 
       await this.userRepository.save(user);
       user.password = '******';
-      return user;
-      // TODO: JWT for authentication
+      return { ...user, token: this.getJwtToken({ email: user.email }) };
     } catch (error) {
       this.handleDbErros(error);
     }
@@ -38,8 +44,8 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { email },
       select: { email: true, password: true },
-     });
-    
+    });
+
     if (!user) {
       throw new UnauthorizedException('Not valid credentials - email');
     }
@@ -47,9 +53,8 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException('Not valid credentials - password');
     }
-    
-    return user;
-    // TODO: JWT for authentication
+
+    return { ...user, token: this.getJwtToken({ email: user.email }) };
   }
 
   private handleDbErros(error: any): never {
@@ -60,5 +65,10 @@ export class AuthService {
     console.log(error);
 
     throw new BadRequestException('Unexpected error, check server logs');
+  }
+
+  private getJwtToken(payload: JwtPayload) {
+    const token = this.jwtService.sign(payload);
+    return token;
   }
 }
