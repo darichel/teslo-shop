@@ -32,7 +32,7 @@ export class AuthService {
 
       await this.userRepository.save(user);
       user.password = '******';
-      return { ...user, token: this.getJwtToken({ email: user.email }) };
+      return { ...user, token: this.getJwtToken({ id: user.id }) };
     } catch (error) {
       this.handleDbErros(error);
     }
@@ -43,7 +43,7 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true },
+      select: { email: true, password: true, id:true },
     });
 
     if (!user) {
@@ -54,7 +54,7 @@ export class AuthService {
       throw new UnauthorizedException('Not valid credentials - password');
     }
 
-    return { ...user, token: this.getJwtToken({ email: user.email }) };
+    return { ...user, token: this.getJwtToken({ id: user.id }) };
   }
 
   testingPrivateRoute() {
