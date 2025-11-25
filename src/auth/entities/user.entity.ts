@@ -8,7 +8,7 @@ export class User {
   @Column('text', { unique: true })
   email: string;
 
-  @Column('text')
+  @Column('text', { select: false }) // select: false to exclude password from queries by default
   password: string;
 
   @Column('text')
