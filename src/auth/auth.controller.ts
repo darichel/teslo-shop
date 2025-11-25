@@ -24,13 +24,15 @@ export class AuthController {
   @UseGuards(AuthGuard())
   testingPrivateRoute(
    // @Req() request: Express.Request,
-   @GetUser() user: User
+   @GetUser() user: User,
+   @GetUser('email') userEmail: string,
   ) {
     //console.log({ user: request.user });
     return {
       ok: true,
       message: 'Hola mundo private',
-      user
+      user,
+      userEmail,
     };
   }
 }
