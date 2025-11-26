@@ -1,8 +1,10 @@
+import { Product } from 'src/products/entities';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -26,6 +28,10 @@ export class User {
   @Column('text', { array: true, default: ['user'] })
   roles: string[];
 
+  // Product association
+  @OneToMany(() => Product, (product) => product.user)
+  product: Product[];
+
   @BeforeInsert()
   checkBeforeInsert() {
     this.email = this.email.toLowerCase().trim();
@@ -35,4 +41,5 @@ export class User {
   checkBeforeUpdate() {
     this.checkBeforeInsert();
   }
+
 }
