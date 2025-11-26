@@ -62,12 +62,11 @@ export class AuthController {
   }
 
   @Get('private3')
-  //@SetMetadata('roles', ['admin', 'super-user'])
+  //decorator composition auth and role
   @Auth(ValidRoles.admin, ValidRoles.superUser)
   testingPrivateRoute3(
     @GetUser() user: User,
   ) {
-    //console.log({ rawHeaders });
     return {
       ok: true,
       message: `Hola ${user.fullName}`,
