@@ -14,25 +14,31 @@ import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 import { ValidRoles } from './interfaces/valid-roles.interface';
 import { GetUser, RawHeaders, RoleProtected, Auth } from './decorators';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  
   @Post('register')
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 201, description: 'User created' })
   createUser(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
 
   @Post('login')
+  @ApiResponse({ status: 400, description: 'Bad Request' })
+  @ApiResponse({ status: 201, description: 'User logged in' })
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }
 
-  @Get('private')
+/*   @Get('private')
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 200, description: 'Success' })
   @UseGuards(AuthGuard())
   testingPrivateRoute(
     @Req() request: Express.Request,
@@ -49,8 +55,9 @@ export class AuthController {
       rawHeaders,
     };
   }
-
   @Get('private2')
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   //@SetMetadata('roles', ['admin', 'super-user'])
   @RoleProtected(ValidRoles.admin, ValidRoles.superUser)
   @UseGuards(AuthGuard(), UserRoleGuard)
@@ -62,10 +69,12 @@ export class AuthController {
       ok: true,
       message: 'Hola mundo private',
     };
-  }
+  } */
 
-  @Get('private3')
+  @Get('private')
   //decorator composition auth and role
+  @ApiResponse({ status: 200, description: 'Success', type: User })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @Auth()
   testingPrivateRoute3(@GetUser() user: User) {
     return {
@@ -77,6 +86,8 @@ export class AuthController {
 
   @Get('check-status')
   @Auth()
+  @ApiResponse({ status: 200, description: 'Success' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   checkAuthStatus(@GetUser() user: User) {
     return this.authService.checkStatus(user);
   }

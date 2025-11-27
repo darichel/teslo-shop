@@ -8,7 +8,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ConfigService } from '@nestjs/config';
@@ -25,6 +25,7 @@ export class FilesController {
   ) {}
 
   @Get('product/:id')
+  @ApiResponse({ status: 200, description: 'Success' })
   findProductImage(@Res() res: Response, @Param('id') id: string) {
     const path = this.filesService.getStaticProductImage(id);
     res.sendFile(path);
@@ -40,6 +41,7 @@ export class FilesController {
       }),
     }),
   ) //Interceptor ,'file' must match the field name in the form-data
+  @ApiResponse({ status: 201, description: 'File uploaded' })
   uploadProductImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('File not provided');
 

@@ -34,17 +34,22 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiResponse({ status: 200, description: 'List of products', type: [Product] })
   findAll(@Query() paginationDto: PaginationDto) {
     return this.productsService.findAll(paginationDto);
   }
 
   @Get(':term')
+  @ApiResponse({ status: 200, description: 'Product found', type: Product })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   findOne(@Param('term') term: string) {
     return this.productsService.findOnePlain(term);
   }
 
   @Patch(':id')
   @Auth(ValidRoles.admin)
+  @ApiResponse({ status: 200, description: 'Product updated', type: Product })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
@@ -55,6 +60,8 @@ export class ProductsController {
 
   @Delete(':id')
   @Auth(ValidRoles.admin)
+  @ApiResponse({ status: 200, description: 'This action removes a product' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.remove(id);
   }
