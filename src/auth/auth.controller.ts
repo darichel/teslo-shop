@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 import { ValidRoles } from './interfaces/valid-roles.interface';
-import { GetUser, RawHeaders, RoleProtected, Auth} from './decorators';
+import { GetUser, RawHeaders, RoleProtected, Auth } from './decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -63,14 +63,18 @@ export class AuthController {
 
   @Get('private3')
   //decorator composition auth and role
-  @Auth(ValidRoles.admin, ValidRoles.superUser)
-  testingPrivateRoute3(
-    @GetUser() user: User,
-  ) {
+  @Auth()
+  testingPrivateRoute3(@GetUser() user: User) {
     return {
       ok: true,
       message: `Hola ${user.fullName}`,
       user,
     };
+  }
+
+  @Get('check-status')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User) {
+    return this.authService.checkStatus(user);
   }
 }
