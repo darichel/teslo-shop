@@ -8,6 +8,8 @@ import {
 import { MessagesWsService } from './messages-ws.service';
 import { Server, Socket } from 'socket.io';
 import { NewMessageDto } from './dtos/new-message.dto';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @WebSocketGateway({ cors: true })
 export class MessagesWsGateway
@@ -15,12 +17,24 @@ export class MessagesWsGateway
 {
   @WebSocketServer() wss: Server;
 
-  constructor(private readonly messagesWsService: MessagesWsService) {}
+  constructor(
+    private readonly messagesWsService: MessagesWsService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   handleConnection(client: Socket) {
     //console.log('Client connected', client.id);
     const token = client.handshake.headers.authentication as string;
-    console.log({token});
+    let payload: JwtPayload;
+
+    try {
+      payload = this.jwtService.verify(token);
+      console.log({ id :payload.id });
+    } catch (error) {
+      client.disconnect();
+      return;
+    }
+
     this.messagesWsService.conectedClient(client);
 
     this.wss.emit(
@@ -46,7 +60,7 @@ export class MessagesWsGateway
     // client.emit('message-from-server', {
     //   message: `Hello, you sent -> ${payload.message}`,
     // });
-  
+
     //! Emit to all clients except the one who sent the message
     // client.broadcast.emit('message-from-server', {
     //   message: payload.message,
