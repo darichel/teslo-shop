@@ -9,6 +9,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { MessagesWsModule } from './messages-ws/messages-ws.module';
+import { config } from 'process';
 
 @Module({
   imports: [
@@ -16,6 +17,10 @@ import { MessagesWsModule } from './messages-ws/messages-ws.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
+        ssl:
+          configService.get<string>('STAGE') === 'prod'
+            ? { rejectUnauthorized: false }
+            : false,
         type: 'postgres',
         host: configService.get<string>('DB_HOST'),
         port: configService.get<number>('DB_PORT'),
@@ -23,7 +28,7 @@ import { MessagesWsModule } from './messages-ws/messages-ws.module';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: configService.get<string>('STAGE') !== 'prod',
       }),
       inject: [ConfigService],
     }),
